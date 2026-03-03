@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>КАРМАН • Тренажер выживания</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(145deg, #2b2b2b 0%, #1a1a1a 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 12px 40px;
+        }
+        
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 48px;
+            padding: 24px 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-icon {
+            font-size: 36px;
+            filter: drop-shadow(0 4px 6px #00000066);
+        }
+        
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffd166, #f8c630);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+        
+        .badge {
+            background: #3a3a3a;
+            color: #ffd966;
+            padding: 6px 14px;
+            border-radius: 60px;
+            font-size: 14px;
+            font-weight: 600;
+            border: 1px solid #5a5a5a;
+            box-shadow: inset 0 1px 3px #ffffff1a;
+        }
+        
+        .difficulty-panel {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .difficulty-btn {
+            flex: 1 1 auto;
+            min-width: 90px;
+            padding: 14px 6px;
+            border: none;
+            border-radius: 36px;
+            font-weight: 700;
+            font-size: 16px;
+            background: #2e2e2e;
+            color: #aaa;
+            box-shadow: inset 0 -3px 0 #0f0f0f;
+            transition: all 0.15s;
+            cursor: pointer;
+            border: 1px solid #3f3f3f;
+        }
+        
+        .difficulty-btn.active {
+            background: #3a3a3a;
+            color: white;
+            box-shadow: 0 0 0 2px #f8c630, inset 0 -3px 0 #926d1a;
+            transform: scale(1.02);
+            border-color: #f8c630;
+        }
+        
+        .difficulty-btn.easy.active { background: #2e7d32; color: white; border-color: #81c784; }
+        .difficulty-btn.medium.active { background: #b06d0b; color: white; border-color: #ffb74d; }
+        .difficulty-btn.hard.active { background: #9c2c2c; color: white; border-color: #ff8a80; }
+        
+        .situation-selector {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 8px 2px 16px;
+            margin-bottom: 10px;
+            scrollbar-width: thin;
+            scrollbar-color: #f8c630 #2a2a2a;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .situation-selector::-webkit-scrollbar {
+            height: 5px;
+        }
+        
+        .situation-selector::-webkit-scrollbar-thumb {
+            background: #f8c630;
+            border-radius: 20px;
+        }
+        
+        .situation-tab {
+            background: #2c2c2c;
+            border: 1px solid #404040;
+            border-radius: 40px;
+            padding: 10px 20px;
+            white-space: nowrap;
+            font-size: 15px;
+            font-weight: 600;
+            color: #b0b0b0;
+            cursor: pointer;
+            transition: all 0.1s;
+            box-shadow: inset 0 -2px 0 #1a1a1a;
+        }
+        
+        .situation-tab.active {
+            background: #3d3d3d;
+            color: #ffd966;
+            border-color: #f8c630;
+            box-shadow: 0 2px 10px #f8c63033;
+        }
+        
+        .situation-tab.completed {
+            background: #1e4a2b;
+            color: #b0ffb0;
+            border-color: #4caf50;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background: #232323;
+            border-radius: 60px;
+            margin: 20px 0 25px;
+            border: 1px solid #3d3d3d;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #f8c630, #ffb347);
+            border-radius: 60px;
+            transition: width 0.2s ease;
+            box-shadow: 0 0 12px #f8c630;
+        }
+        
+        .question-card {
+            background: #2a2a2a;
+            border-radius: 36px;
+            padding: 28px 20px;
+            margin-bottom: 30px;
+            border: 1px solid #444;
+            box-shadow: inset 0 2px 6px #ffffff0d, 0 12px 24px -12px black;
+        }
+        
+        .situation-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #f0e6d0;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .situation-desc {
+            font-size: 17px;
+            line-height: 1.5;
+            color: #ccc;
+            background: #1f1f1f;
+            padding: 20px 18px;
+            border-radius: 28px;
+            margin-bottom: 28px;
+            border-left: 5px solid #f8c630;
+        }
+        
+        .answers-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        
+        .answer-btn {
+            background: #2e2e2e;
+            border: 2px solid #404040;
+            border-radius: 60px;
+            padding: 18px 22px;
+            text-align: left;
+            font-size: 16px;
+            font-weight: 500;
+            color: #ddd;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 0 6px 0 #1b1b1b;
+            width: 100%;
+        }
+        
+        .answer-btn:hover:not(:disabled) {
+            background: #3a3a3a;
+            border-color: #f8c630;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #1b1b1b;
+        }
+        
+        .answer-btn.correct {
+            background: #1e4f2a;
+            border-color: #4caf50;
+            color: #e0ffe0;
+            box-shadow: 0 0 15px #4caf50aa;
+            transform: scale(1.01);
+        }
+        
+        .answer-btn.wrong {
+            background: #632b2b;
+            border-color: #f44336;
+            color: #ffd6d6;
+            box-shadow: 0 0 15px #f44336aa;
+            opacity: 0.9;
+        }
+        
+        .answer-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .feedback {
+            background: #202020;
+            border-radius: 28px;
+            padding: 18px 20px;
+            font-size: 16px;
+            border-left: 6px solid;
+            margin: 18px 0 10px;
+            color: #d0d0d0;
+            line-height: 1.5;
+            border-color: #f8c630;
+        }
+        
+        .feedback.correct-feedback { border-color: #4caf50; background: #1a3b1a; }
+        .feedback.wrong-feedback { border-color: #f44336; background: #3e2323; }
+        
+        .reset-btn {
+            background: #373737;
+            border: 1px solid #5a5a5a;
+            border-radius: 60px;
+            padding: 14px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #f0f0f0;
+            cursor: pointer;
+            margin: 20px auto 0;
+            display: block;
+            transition: all 0.1s;
+            box-shadow: 0 5px 0 #1f1f1f;
+        }
+        
+        .reset-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #1f1f1f;
+        }
+        
+        .footer-note {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 450px) {
+            .container { padding: 18px 12px; }
+            .situation-title { font-size: 20px; }
+            .answer-btn { padding: 16px 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <span class="logo-icon">👖</span>
+                <span class="logo-text">КАРМАН</span>
+            </div>
+            <div class="badge">16+ тренажер</div>
+        </div>
+
+        <!-- Выбор сложности -->
+        <div class="difficulty-panel">
+            <button class="difficulty-btn easy active" data-diff="easy">🟢 Легко</button>
+            <button class="difficulty-btn medium" data-diff="medium">🟡 Средне</button>
+            <button class="difficulty-btn hard" data-diff="hard">🔴 Сложно</button>
+        </div>
+
+        <!-- Список ситуаций (скролл) -->
+        <div class="situation-selector" id="situationTabs"></div>
+
+        <!-- Прогресс -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+        </div>
+
+        <!-- Карточка вопроса -->
+        <div class="question-card" id="questionCard">
+            <div class="situation-title" id="situationTitle">Загрузка...</div>
+            <div class="situation-desc" id="situationDesc"></div>
+            <div class="answers-grid" id="answersContainer"></div>
+            <div class="feedback" id="feedbackArea">👆 Выбери вариант</div>
+        </div>
+
+        <!-- Кнопка сброса прогресса уровня -->
+        <button class="reset-btn" id="resetLevelBtn">🔄 Начать уровень заново</button>
+        <div class="footer-note">— правильных ответов: <span id="scoreDisplay">0/0</span> —</div>
+    </div>
+
+    <script>
+        (function() {
+            // ======================== БАЗА СИТУАЦИЙ =========================
+            const situations = {
+                easy: [
+                    {
+                        id: 'e1',
+                        title: '😐 Своя жвачка в кармане',
+                        desc: 'Ты зашёл в магазин. В кармане твоя жвачка (купил вчера). Охранник подлетает: "Покажи карманы, я видел, как ты взял с полки!"',
+                        options: [
+                            'А) Достаю жвачку, отдаю ему: "Забирайте, я не специально"',
+                            'Б) Спокойно: "Это моя личная, куплена в другом месте. Вызывайте полицию, если сомневаетесь, но руки не трогать"'
+                        ],
+                        correct: 1,
+                        explanation: '❌ А — ты даришь свои деньги магазину, создаёшь прецедент. ✅ Б — законно, вежливо, без паники. У охранника нет права обыска.'
+                    },
+                    {
+                        id: 'e2',
+                        title: '🛒 Своя бутылка воды',
+                        desc: 'У тебя в рюкзаке своя вода, зашел в жару. Охранник на входе: "Рюкзак оставь в камере хранения!"',
+                        options: [
+                            'А) "Ладно", сдаю рюкзак.',
+                            'Б) "Это мои личные вещи, я имею право носить их с собой. На выходе покажу, если хотите."'
+                        ],
+                        correct: 1,
+                        explanation: '❌ А — унизительно и неудобно. ✅ Б — твоё право: личные вещи можно носить.'
+                    },
+                    {
+                        id: 'e3',
+                        title: '📸 Съемка ценников',
+                        desc: 'Ты фоткаешь ценник (проверяешь акцию). Подходит продавец: "У нас съемка запрещена, удали!"',
+                        options: [
+                            'А) "Извините, не знал" — удаляю.',
+                            'Б) "Съемка товаров разрешена, это не коммерческая тайна. Если надо, позову администратора."'
+                        ],
+                        correct: 1,
+                        explanation: '❌ А — зря удалишь, мог зафиксировать нарушение. ✅ Б — ссылайся на закон о защите прав потребителей.'
+                    },
+                    {
+                        id: 'e4',
+                        title: '🧾 Забыл пробить мелочь',
+                        desc: 'На кассе самообслуживания забыл пробить жвачку (40 руб). Контролер догоняет у выхода: "Не оплатили!"',
+                        options: [
+                            'А) "Ой, сейчас вернусь и оплачу" — иду обратно, извиняюсь, плачу.',
+                            'Б) "Да быть не может, всё пробил" — ускоряю шаг.'
+                        ],
+                        correct: 0,
+                        explanation: '✅ А — честно, случайность, скорее всего просто попросят оплатить. ❌ Б — побег = кража.'
+                    },
+                    {
+                        id: 'e5',
+                        title: '👀 Охранник ходит по пятам',
+                        desc: 'Ты просто выбираешь товар, охранник прилип и сверлит взглядом. Это бесит.',
+                        options: [
+                            'А) Молча терпеть, психовать внутри.',
+                            'Б) Повернуться и спокойно: "Вы меня смущаете, я ничего не краду. Если подозреваете — подойдите и спросите."'
+                        ],
+                        correct: 1,
+                        explanation: '❌ А — нервы ни к чему. ✅ Б — ставишь на место, не грубя, часто срабатывает.'
+                    },
+                    {
+                        id: 'e6',
+                        title: '🚪 Требуют открыть сумку на выходе',
+                        desc: 'На выходе охранник: "Открой сумку, надо проверить."',
+                        options: [
+                            'А) Открываю, пусть смотрит.',
+                            'Б) "Вы не имеете права требовать открыть сумку, это личный досмотр. Вызывайте полицию, если есть основания."'
+                        ],
+                        correct: 1,
+                        explanation: '❌ А — добровольное согласие, но потом будут приставать всегда. ✅ Б — отказ с отсылкой к закону.'
+                    },
+                    {
+                        id: 'e7',
+                        title: '🗣️ "Слышь, иди сюда"',
+                        desc: 'Охранник с порога: "Эй, иди сюда быстро!"',
+                        options: [
+                            'А) Подойти и грубить в ответ.',
+                            'Б) Остановиться, спокойно: "Я вас слушаю, говорите."'
+                        ],
+                        correct: 1,
+                        explanation: '❌ А — грубость = конфликт. ✅ Б — спокойствие сбивает настрой.'
+                    },
+                    {
+                        id: 'e8',
+                        title: '🧃 Сок в кармане куртки',
+                        desc: 'Ты взял сок, положил в карман куртки (руки заняты), идешь к кассе. Охрана перехватывает: "Положил в карман — воруешь!"',
+                        options: [
+                            'А) Испугаться, начать оправдываться.',
+                            'Б) "Я просто несу к кассе, руки заняты. Хотите — вместе пройдем и оплатим."'
+                        ],
+                        correct: 1,
+                        explanation: '❌ А — паника на руку охране. ✅ Б — конструктив, показываешь, что не крадешь.'
+                    }
+                ],
+                medium: [
+                    {
+                        id: 'm1',
+                        title: '🛡️ Преградил путь рукой',
+                        desc: 'Ты спокойно идешь к выходу. Охранник выставляет руку, преграждая дорогу: "Стоять, сейчас полиция приедет!" Ты ничего не крал.',
+                        options: [
+                            'А) Пытаться проскочить, оттолкнуть руку.',
+                            'Б) Остановиться, включить запись на телефоне: "Вы преграждаете мне путь, это незаконно. Или вызывайте полицию, или дайте пройти."',
+                            'В) Молча стоять и ждать, пока сам уберет.'
+                        ],
+                        correct: 1,
+                        explanation: '❌ А — физический контакт = повод для силы. ✅ Б — лучший: фиксируешь нарушение, требуешь либо вызвать полицию, либо освободить проход. ❌ В — пассивно, можешь стоять долго.'
+                    },
+                    {
+                        id: 'm2',
+                        title: '🤳 Своя жвачка, но охранник рвется в карман',
+                        desc: 'У тебя в кармане твоя жвачка. Охранник орет и лезет рукой в карман, пытаясь достать.',
+                        options: [
+                            'А) Резко вырваться, убежать.',
+                            'Б) Громко: "Руки убрал! Тебе нельзя меня обыскивать! Это статья 203 УК! Отойди, вызываю полицию!" — отступаешь, включаешь запись.',
+                            'В) Дать обыскать, потом разбираться.'
+                        ],
+                        correct: 1,
+                        explanation: '❌ А — убегать = признание вины. ✅ Б — жёстко, по закону, с видео. ❌ В — унизительно и незаконно.'
+                    },
+                    {
+                        id: 'm3',
+                        title: '👥 Друзья снимают, охранник звереет',
+                        desc: 'Друзья снимают происходящее на телефоны. Охранник: "А ну уберите камеры, или заберу телефоны!"',
+                        options: [
+                            'А) Испугаться, убрать телефоны.',
+                            'Б) Сказать друзьям: "Снимайте дальше, это наша защита". Охраннику: "Забирать телефоны — грабёж, статья 161. Мы выложим видео в сеть."',
+                            'В) Начать спорить, дразнить охранника.'
+                        ],
+                        correct: 1,
+                        explanation: '❌ А — потеряешь доказательства. ✅ Б — уверенно, законно, камеры защищают. ❌ В — провокация, могут обвинить в хулиганке.'
+                    },
+                    {
+                        id: 'm4',
+                        title: '🎒 Свой рюкзак, на выходе досмотр',
+                        desc: 'Ты с друзьями. На выходе охрана: "Всем открыть рюкзаки!" Друзья открывают, ты — нет.',
+                        options: [
+                            'А) Открыть, как друзья, не выделяться.',
+                            'Б) Сказать: "Ребята, вы зря открыли. Я не открою. Либо полиция с понятыми, либо я вызываю полицию сам за превышение."',
+                            'В) Попытаться незаметно выскользнуть.'
+                        ],
+                        correct: 1,
+                        explanation: '❌ А — создаёшь плохую практику. ✅ Б — грамотно, объясняешь друзьям, защищаешь права. ❌ В — вызовет подозрения.'
+                    },
+                    {
+                        id: 'm5',
+                        title: '🚔 Приехала полиция, охранник врёт',
+                        desc: 'Приехала полиция. Охранник говорит: "Он прятал товар в карман, я видел!" Ты не прятал, товар твой.',
+                        options: [
+                            'А) Молчать, бояться, надеяться на лучшее.',
+                            'Б) Спокойно полицейскому: "Могу сразу показать содержимое карманов в присутствии понятых и с протоколом. У меня личные вещи, чеки сохранены. А охранник хватал меня без оснований — вон мои свидетели."',
+                            'В) Начать орать на охранника при полиции.'
+                        ],
+                        correct: 1,
+                        explanation: '❌ А — пассивность играет против. ✅ Б — предлагаешь законную процедуру, указываешь на свидетелей. ❌ В — полиция не любит буйных.'
+                    }
+                ],
+                hard: [
+                    {
+                        id: 'h1',
+                        title: '🎭 Двойная жвачка + друзья + провокация',
+                        desc: 'Ты пришёл с двумя друзьями. У тебя в кармане две свои жвачки (с чеками). Ты взял с полки чипсы, положил в пакет, потом "передумал" — вернул на полку. Охранник видел только момент, когда ты клал в пакет. Он орёт: "Вор, чипсы в пакете!" и хватает за руку. Друзья снимают. Твои действия?',
+                        options: [
+                            'А) Вырваться, крикнуть друзьям "бежим", убежать.',
+                            'Б) Громко: "Отпусти руку, мне 16! Я вернул товар на полку, камера подтвердит. Друзья, снимайте его лицо и руки. Если не отпустишь — заявление в прокуратуру, срок обеспечен!"',
+                            'В) Заплакать, начать просить прощения, отдать деньги за чипсы, которых у тебя нет.',
+                            'Г) Ударить охранника в ответ, чтобы отпустил.'
+                        ],
+                        correct: 1,
+                        explanation: '❌ А — побег = вина, поймают. ✅ Б — идеально: возраст, камеры, факты, угроза заявлением. ❌ В — слабость, могут повесить чужое. ❌ Г — нападение на охранника = уголовка.'
+                    },
+                    {
+                        id: 'h2',
+                        title: '🧳 Свой пакет, чужой товар, весовой контроль',
+                        desc: 'У тебя большой свой пакет. В нем твоя бутылка воды и твоя пачка печенья (с чеками). Ты набрал продуктов, на кассе самообслуживания пробил всё, но одна банка колы закатилась под твои старые вещи. Ты её не заметил. Весовой контроль сработал, пришёл контролёр: "В пакете есть неоплаченный товар!"',
+                        options: [
+                            'А) Сказать, что это твоя старая кола, хотя это не так.',
+                            'Б) Перерыть пакет, найти колу, удивиться: "Ой, правда, не пробил. Сейчас оплачу, извините. Это случайно вышло."',
+                            'В) Бросить пакет и убежать.',
+                            'Г) Начать кричать, что подставили.'
+                        ],
+                        correct: 1,
+                        explanation: '❌ А — обман вскроется (штрихкоды, даты). ✅ Б — честно, случайность, оплатил — и нет проблем. ❌ В — кража. ❌ Г — истерика усугубит.'
+                    },
+                    {
+                        id: 'h3',
+                        title: '👮 Полиция, понятые, отказ от досмотра',
+                        desc: 'Полиция приехала по вызову охранника. Тебе 16. Охранник утверждает, что ты украл колбасу (лежит в твоем пакете, но это твоя старая). Полицейский говорит: "Давай показывай, что в пакете, и разойдемся".',
+                        options: [
+                            'А) Открыть и показать — чего бояться, своё же.',
+                            'Б) Отказаться: "Показывать ничего не буду. Хотите досмотреть — проводите досмотр по закону: с двумя понятыми моего пола, с протоколом. Без этого я ничего не показываю."',
+                            'В) Расплакаться и сознаться в краже, которой не было.',
+                            'Г) Резко выбросить пакет и напасть на полицейского.'
+                        ],
+                        correct: 1,
+                        explanation: '❌ А — если покажешь без понятых, потом охранник скажет "видел там краденое", а подтвердить нечем. ✅ Б — требуешь процедуры, защищаешь себя. ❌ В — самооговор. ❌ Г — нападение на полицию = тяжкая статья.'
+                    }
+                ]
+            };
+
+            // ================== СОСТОЯНИЕ ==================
+            let currentDifficulty = 'easy';
+            let currentIndex = 0;
+            let completed = { easy: [], medium: [], hard: [] };
+            let selectedOption = null; // для подсветки
+
+            // ================== DOM ЭЛЕМЕНТЫ ==================
+            const diffBtns = document.querySelectorAll('.difficulty-btn');
+            const tabsContainer = document.getElementById('situationTabs');
+            const progressBar = document.getElementById('progressBar');
+            const titleEl = document.getElementById('situationTitle');
+            const descEl = document.getElementById('situationDesc');
+            const answersEl = document.getElementById('answersContainer');
+            const feedbackEl = document.getElementById('feedbackArea');
+            const resetBtn = document.getElementById('resetLevelBtn');
+            const scoreSpan = document.getElementById('scoreDisplay');
+
+            // ================== ФУНКЦИИ ==================
+            function saveState() {
+                localStorage.setItem('karman_completed', JSON.stringify(completed));
+            }
+
+            function loadState() {
+                const saved = localStorage.getItem('karman_completed');
+                if (saved) {
+                    try { completed = JSON.parse(saved); } catch (e) {}
+                }
+            }
+
+            function renderTabs() {
+                const list = situations[currentDifficulty];
+                let html = '';
+                list.forEach((s, idx) => {
+                    const isCompleted = completed[currentDifficulty].includes(idx);
+                    const activeClass = (idx === currentIndex) ? 'active' : '';
+                    const completedClass = isCompleted ? 'completed' : '';
+                    html += `<div class="situation-tab ${activeClass} ${completedClass}" data-idx="${idx}">${idx+1}. ${s.title}</div>`;
+                });
+                tabsContainer.innerHTML = html;
+
+                // добавить обработчики
+                document.querySelectorAll('.situation-tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        const idx = parseInt(e.currentTarget.dataset.idx, 10);
+                        if (!isNaN(idx)) {
+                            currentIndex = idx;
+                            selectedOption = null;
+                            renderQuestion();
+                            renderTabs(); // обновить активный таб
+                        }
+                    });
+                });
+            }
+
+            function updateProgress() {
+                const list = situations[currentDifficulty];
+                const completedCount = completed[currentDifficulty].length;
+                const percent = list.length ? (completedCount / list.length) * 100 : 0;
+                progressBar.style.width = percent + '%';
+                scoreSpan.innerText = `${completedCount}/${list.length}`;
+            }
+
+            function renderQuestion() {
+                const list = situations[currentDifficulty];
+                if (!list.length) return;
+                const sit = list[currentIndex];
+                titleEl.innerText = sit.title;
+                descEl.innerText = sit.desc;
+
+                let answersHtml = '';
+                sit.options.forEach((opt, idx) => {
+                    let extraClass = '';
+                    if (selectedOption !== null) {
+                        if (idx === sit.correct) extraClass = ' correct';
+                        else if (idx === selectedOption && selectedOption !== sit.correct) extraClass = ' wrong';
+                        // если выбран правильный — он зеленый, остальные нейтральные (но задизейблены)
+                    }
+                    answersHtml += `<button class="answer-btn${extraClass}" data-opt="${idx}" ${selectedOption !== null ? 'disabled' : ''}>${opt}</button>`;
+                });
+                answersEl.innerHTML = answersHtml;
+
+                if (selectedOption !== null) {
+                    const isCorrect = (selectedOption === sit.correct);
+                    feedbackEl.className = `feedback ${isCorrect ? 'correct-feedback' : 'wrong-feedback'}`;
+                    feedbackEl.innerText = sit.explanation;
+                } else {
+                    feedbackEl.className = 'feedback';
+                    feedbackEl.innerText = '👆 Выбери вариант ответа';
+                }
+
+                // обработчики на кнопки ответов
+                document.querySelectorAll('.answer-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        if (selectedOption !== null) return;
+                        const optIdx = parseInt(e.currentTarget.dataset.opt, 10);
+                        selectedOption = optIdx;
+
+                        if (optIdx === sit.correct) {
+                            if (!completed[currentDifficulty].includes(currentIndex)) {
+                                completed[currentDifficulty].push(currentIndex);
+                                saveState();
+                            }
+                        }
+
+                        renderQuestion();
+                        renderTabs();
+                        updateProgress();
+                    });
+                });
+            }
+
+            function resetLevel() {
+                completed[currentDifficulty] = [];
+                selectedOption = null;
+                currentIndex = 0;
+                saveState();
+                renderTabs();
+                renderQuestion();
+                updateProgress();
+            }
+
+            function switchDifficulty(diff) {
+                currentDifficulty = diff;
+                currentIndex = 0;
+                selectedOption = null;
+                diffBtns.forEach(btn => {
+                    btn.classList.remove('active', 'easy', 'medium', 'hard');
+                    if (btn.dataset.diff === diff) {
+                        btn.classList.add('active', diff);
+                    }
+                });
+                renderTabs();
+                renderQuestion();
+                updateProgress();
+            }
+
+            // ================== ИНИЦИАЛИЗАЦИЯ ==================
+            loadState();
+
+            // переключатели сложности
+            diffBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const diff = btn.dataset.diff;
+                    switchDifficulty(diff);
+                });
+            });
+
+            resetBtn.addEventListener('click', resetLevel);
+
+            // первоначальная отрисовка
+            renderTabs();
+            renderQuestion();
+            updateProgress();
+
+            // синхронизация табов при смене сложности
+        })();
+    </script>
+</body>
+</html>
